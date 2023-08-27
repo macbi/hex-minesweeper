@@ -110,6 +110,7 @@ class _MyRevealState extends State<_MyReveal> {
         setState(() {
           _finished = true;
         });
+        break;
       case AnimationStatus.forward:
       case AnimationStatus.dismissed:
       case AnimationStatus.reverse:
