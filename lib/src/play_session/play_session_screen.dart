@@ -12,13 +12,11 @@ import 'package:logging/logging.dart' hide Level;
 import 'package:provider/provider.dart';
 import 'dart:math';
 
-import '../ads/ads_controller.dart';
 import '../audio/audio_controller.dart';
 import '../audio/sounds.dart';
 import '../game_internals/level_state.dart';
 import '../games_services/games_services.dart';
 import '../games_services/score.dart';
-import '../in_app_purchase/in_app_purchase.dart';
 import '../level_selection/levels.dart';
 import '../player_progress/player_progress.dart';
 import '../style/confetti.dart';
@@ -50,13 +48,6 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
     generateGrid();
 
     _startOfPlay = DateTime.now();
-
-    // Preload ad for the win screen.
-    final adsRemoved = context.read<InAppPurchaseController?>()?.adRemoval.active ?? false;
-    if (!adsRemoved) {
-      final adsController = context.read<AdsController?>();
-      adsController?.preloadAd();
-    }
   }
 
   Widget buildButton(CellModel cell) {

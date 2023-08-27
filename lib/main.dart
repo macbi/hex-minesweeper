@@ -14,13 +14,10 @@ import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
-import 'src/ads/ads_controller.dart';
 import 'src/app_lifecycle/app_lifecycle.dart';
 import 'src/audio/audio_controller.dart';
 import 'src/crashlytics/crashlytics.dart';
-import 'src/games_services/games_services.dart';
 import 'src/games_services/score.dart';
-import 'src/in_app_purchase/in_app_purchase.dart';
 import 'src/level_selection/level_selection_screen.dart';
 import 'src/level_selection/levels.dart';
 import 'src/main_menu/main_menu_screen.dart';
@@ -70,42 +67,10 @@ void guardedMain() {
     SystemUiMode.edgeToEdge,
   );
 
-  // TODO: When ready, uncomment the following lines to enable integrations.
-  //       Read the README for more info on each integration.
-
-  AdsController? adsController;
-  // if (!kIsWeb && (Platform.isIOS || Platform.isAndroid)) {
-  //   /// Prepare the google_mobile_ads plugin so that the first ad loads
-  //   /// faster. This can be done later or with a delay if startup
-  //   /// experience suffers.
-  //   adsController = AdsController(MobileAds.instance);
-  //   adsController.initialize();
-  // }
-
-  GamesServicesController? gamesServicesController;
-  // if (!kIsWeb && (Platform.isIOS || Platform.isAndroid)) {
-  //   gamesServicesController = GamesServicesController()
-  //     // Attempt to log the player in.
-  //     ..initialize();
-  // }
-
-  InAppPurchaseController? inAppPurchaseController;
-  // if (!kIsWeb && (Platform.isIOS || Platform.isAndroid)) {
-  //   inAppPurchaseController = InAppPurchaseController(InAppPurchase.instance)
-  //     // Subscribing to [InAppPurchase.instance.purchaseStream] as soon
-  //     // as possible in order not to miss any updates.
-  //     ..subscribe();
-  //   // Ask the store what the player has bought already.
-  //   inAppPurchaseController.restorePurchases();
-  // }
-
-  runApp(
+runApp(
     MyApp(
       settingsPersistence: LocalStorageSettingsPersistence(),
       playerProgressPersistence: LocalStoragePlayerProgressPersistence(),
-      inAppPurchaseController: inAppPurchaseController,
-      adsController: adsController,
-      gamesServicesController: gamesServicesController,
     ),
   );
 }
@@ -187,18 +152,9 @@ class MyApp extends StatelessWidget {
 
   final SettingsPersistence settingsPersistence;
 
-  final GamesServicesController? gamesServicesController;
-
-  final InAppPurchaseController? inAppPurchaseController;
-
-  final AdsController? adsController;
-
   const MyApp({
     required this.playerProgressPersistence,
     required this.settingsPersistence,
-    required this.inAppPurchaseController,
-    required this.adsController,
-    required this.gamesServicesController,
     super.key,
   });
 
@@ -214,11 +170,6 @@ class MyApp extends StatelessWidget {
               return progress;
             },
           ),
-          Provider<GamesServicesController?>.value(
-              value: gamesServicesController),
-          Provider<AdsController?>.value(value: adsController),
-          ChangeNotifierProvider<InAppPurchaseController?>.value(
-              value: inAppPurchaseController),
           Provider<SettingsController>(
             lazy: false,
             create: (context) => SettingsController(
