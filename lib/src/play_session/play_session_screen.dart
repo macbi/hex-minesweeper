@@ -15,7 +15,6 @@ import 'dart:math';
 import '../audio/audio_controller.dart';
 import '../audio/sounds.dart';
 import '../game_internals/level_state.dart';
-import '../games_services/games_services.dart';
 import '../games_services/score.dart';
 import '../level_selection/levels.dart';
 import '../player_progress/player_progress.dart';
@@ -40,6 +39,8 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
 
   bool _duringCelebration = false;
 
+  bool _firstReveal = false;
+
   late DateTime _startOfPlay;
 
   @override
@@ -47,7 +48,7 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
     super.initState();
     generateGrid();
 
-    _startOfPlay = DateTime.now();
+
   }
 
   Widget buildButton(CellModel cell) {
@@ -69,8 +70,8 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
     });
   }
 
-  var width = 8;
-  var height = 8;
+  int width = 0;
+  int height = 0;
   var cells = [];
   var totalCellsRevealed = 0;
   var totalMines = 6;
@@ -90,12 +91,14 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
       }
       cells.add(row);
     }
+  }
 
+  void generateMines(CellModel cell) {
     // Marking mines
     for (int i = 0; i < totalMines; i++) {
       var x = Random().nextInt(width);
       var y = Random().nextInt(height);
-      if (cells[x][y].isMine) {
+      if (cells[x][y].isMine || (x == cell.x && y == cell.y)) {
         i--;
       }
       cells[x][y].isMine = true;
@@ -245,20 +248,6 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
     final audioController = context.read<AudioController>();
     audioController.playSfx(SfxType.congrats);
 
-    final gamesServicesController = context.read<GamesServicesController?>();
-    if (gamesServicesController != null) {
-      // Award achievement.
-      if (widget.level.awardsAchievement) {
-        await gamesServicesController.awardAchievement(
-          android: widget.level.achievementIdAndroid!,
-          iOS: widget.level.achievementIdIOS!,
-        );
-      }
-
-      // Send score to leaderboard.
-      await gamesServicesController.submitLeaderboardScore(score);
-    }
-
     /// Give the player some time to see the celebration animation.
     await Future<void>.delayed(_celebrationDuration);
     if (!mounted) return;
@@ -269,8 +258,12 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
   void _revealCell(CellModel cell) {
     if (cell.isRevealed || cell.isFlagged) return;
 
-    if (cell.isMine && totalCellsRevealed == 0) {
-      //TODO implement lack of mine on first click
+    if(!_firstReveal){
+      _firstReveal = true;
+
+      generateMines(cell);
+
+      _startOfPlay = DateTime.now();
     }
 
     setState(() {
