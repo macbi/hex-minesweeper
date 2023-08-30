@@ -9,11 +9,6 @@ const gameLevels = [
     height: 7,
     mines: 6,
     difficulty: 5,
-    // TODO: When ready, change these achievement IDs.
-    // You configure this in App Store Connect.
-    //achievementIdIOS: 'first_win',
-    // You get this string when you configure an achievement in Play Console.
-    //achievementIdAndroid: 'NhkIwB69ejkMAOOLDb',
   ),
   GameLevel(
     number: 2,
@@ -46,26 +41,12 @@ class GameLevel {
 
   final int difficulty;
 
-  /// The achievement to unlock when the level is finished, if any.
-  final String? achievementIdIOS;
-
-  final String? achievementIdAndroid;
-
-  bool get awardsAchievement => achievementIdAndroid != null;
-
   const GameLevel({
     required this.number,
     required this.width,
     required this.height,
     required this.difficulty,
     required this.mines,
-    this.achievementIdIOS,
-    this.achievementIdAndroid,
-  })  : assert(
-            (achievementIdAndroid != null && achievementIdIOS != null) ||
-                (achievementIdAndroid == null && achievementIdIOS == null),
-            'Either both iOS and Android achievement ID must be provided, '
-            'or none'),
-        assert(width > 0 && height > 0 && (height * width) > mines,
+  })  : assert(width > 0 && height > 0 && (height * width) > mines,
             'Invalid level configuration (mines >= cells or no positive dimensions)');
 }
