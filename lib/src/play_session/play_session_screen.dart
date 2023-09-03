@@ -37,7 +37,11 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
 
   static const _preCelebrationDuration = Duration(milliseconds: 500);
 
+  static const _postLoseDuration = Duration(milliseconds: 1000);
+
   bool _duringCelebration = false;
+
+  bool _duringLose = false;
 
   bool _firstReveal = false;
 
@@ -47,8 +51,6 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
   void initState() {
     super.initState();
     generateGrid();
-
-
   }
 
   Widget buildButton(CellModel cell) {
@@ -98,8 +100,12 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
     for (int i = 0; i < totalMines; i++) {
       var x = Random().nextInt(width);
       var y = Random().nextInt(height);
-      if (cells[x][y].isMine || (x == cell.x && y == cell.y)) {
+      if (cells[x][y].isMine) {
         i--;
+      }
+      if (x == cell.x && y == cell.y) {
+        i--;
+        continue;
       }
       cells[x][y].isMine = true;
     }
@@ -176,39 +182,42 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
           ),
         ),
       ],
-      child: IgnorePointer(
-        ignoring: _duringCelebration,
-        child: Scaffold(
-          backgroundColor: palette.backgroundPlaySession,
-          body: Stack(
-            children: [
-              Center(
-                // This is the entirety of the "game".
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Padding(
+      child: Scaffold(
+        backgroundColor: palette.cream,
+        body: Stack(
+          children: [
+            Center(
+              // This is the entirety of the "game".
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IgnorePointer(
+                    ignoring: _duringCelebration || _duringLose,
+                    child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Container(
                         margin: const EdgeInsets.all(1.0),
                         child: buildButtonColumn(),
                       ),
                     ),
-                    //const Spacer(),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: FilledButton(
-                          onPressed: () => GoRouter.of(context).go('/play'),
-                          child: const Text('Back'),
-                        ),
+                  ),
+                  //const Spacer(),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(
+                        onPressed: () => GoRouter.of(context).go('/play'),
+                        child: const Text('Back'),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              SizedBox.expand(
+            ),
+            IgnorePointer(
+              ignoring: _duringCelebration || _duringLose,
+              child: SizedBox.expand(
                 child: Visibility(
                   visible: _duringCelebration,
                   child: IgnorePointer(
@@ -218,8 +227,8 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
                   ),
                 ),
               ),
-            ],
-          ),
+            )
+          ],
         ),
       ),
     );
@@ -230,7 +239,6 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
 
     final score = Score(
       widget.level.number,
-      widget.level.difficulty,
       DateTime.now().difference(_startOfPlay),
     );
 
@@ -252,13 +260,13 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
     await Future<void>.delayed(_celebrationDuration);
     if (!mounted) return;
 
-    GoRouter.of(context).go('/play/won', extra: {'score': score});
+    GoRouter.of(context).go('/play/won', extra: {'score': score, 'level': widget.level.number});
   }
 
-  void _revealCell(CellModel cell) {
+  void _revealCell(CellModel cell) async {
     if (cell.isRevealed || cell.isFlagged) return;
 
-    if(!_firstReveal){
+    if (!_firstReveal) {
       _firstReveal = true;
 
       generateMines(cell);
@@ -272,6 +280,10 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
 
     if (cell.isMine && totalCellsRevealed > 0) {
       _log.info('Level ${widget.level.number} lost');
+      _duringLose = true;
+
+      await Future<void>.delayed(_postLoseDuration);
+
       _showGameOverDialog();
       return;
     }
@@ -279,7 +291,7 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
     totalCellsRevealed++;
 
     if (totalCellsRevealed == (width * height) - totalMines) {
-      //TODO implement win
+      _playerWon();
     }
 
     if (cell.value == 0) {
@@ -290,6 +302,35 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
   }
 
   void _showGameOverDialog() {
-    //TODO implement dialog with restart and back to menu
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Game Over'),
+        content: const Text('You lost'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              _restart();
+              Navigator.of(context).pop();
+            },
+            child: const Text('Restart'),
+          ),
+          TextButton(
+            onPressed: () => GoRouter.of(context).go('/'),
+            child: const Text('Back to menu'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _restart() {
+    setState(() {
+      _firstReveal = false;
+      _duringCelebration = false;
+      totalCellsRevealed = 0;
+      generateGrid();
+      _duringLose = false;
+    });
   }
 }

@@ -125,13 +125,17 @@ class MyApp extends StatelessWidget {
                       return null;
                     },
                     pageBuilder: (context, state) {
-                      final map = state.extra! as Map<String, dynamic>;
-                      final score = map['score'] as Score;
+                      final mapScore = state.extra! as Map<String, dynamic>;
+                      final score = mapScore['score'] as Score;
+
+                      final mapLevel = state.extra! as Map<String, dynamic>;
+                      final level = mapLevel['level'] as int;
 
                       return buildMyTransition<void>(
                         key: ValueKey('won'),
                         child: WinGameScreen(
                           score: score,
+                          level: level,
                           key: const Key('win game'),
                         ),
                         color: context.watch<Palette>().backgroundPlaySession,
@@ -202,8 +206,8 @@ class MyApp extends StatelessWidget {
             title: 'Flutter Demo',
             theme: ThemeData.from(
               colorScheme: ColorScheme.fromSeed(
-                seedColor: palette.darkPen,
-                background: palette.backgroundMain,
+                seedColor: palette.mediumGreen,
+                background: palette.cream,
               ),
               textTheme: TextTheme(
                 bodyMedium: TextStyle(

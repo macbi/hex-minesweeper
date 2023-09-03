@@ -34,4 +34,9 @@ class Palette {
   Color get background4 => const Color(0xffffd7ff);
   Color get backgroundSettings => const Color(0xffbfc8e3);
   Color get trueWhite => const Color(0xffffffff);
+  Color get darkGreen => const Color(0xff17152e);
+  Color get mediumGreen => const Color(0xff3c566c);
+  Color get lightGreen => const Color(0xff84aea4);
+  Color get cream => const Color(0xffd4e2cc);
+  Color get redHighlight => const Color(0xffe43254);
 }

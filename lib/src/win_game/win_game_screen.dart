@@ -9,19 +9,22 @@ import 'package:provider/provider.dart';
 import '../games_services/score.dart';
 import '../style/palette.dart';
 import '../style/responsive_screen.dart';
+import '../level_selection/levels.dart';
 
 class WinGameScreen extends StatelessWidget {
   final Score score;
+  final int level;
 
   const WinGameScreen({
     super.key,
     required this.score,
+    required this.level,
   });
 
   @override
   Widget build(BuildContext context) {
-
     final palette = context.watch<Palette>();
+    final levelNumber = gameLevels.length;
 
     const gap = SizedBox(height: 10);
 
@@ -40,19 +43,30 @@ class WinGameScreen extends StatelessWidget {
             gap,
             Center(
               child: Text(
-                'Score: ${score.score}\n'
                 'Time: ${score.formattedTime}',
-                style: const TextStyle(
-                    fontFamily: 'Permanent Marker', fontSize: 20),
+                style: const TextStyle(fontFamily: 'Permanent Marker', fontSize: 20),
               ),
             ),
           ],
         ),
-        rectangularMenuArea: FilledButton(
-          onPressed: () {
-            GoRouter.of(context).go('/play');
-          },
-          child: const Text('Continue'),
+        rectangularMenuArea: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              FilledButton(
+                  onPressed: () {
+                    GoRouter.of(context).go('/');
+                  },
+                  child: const Text('Main Menu')
+              ),
+              FilledButton(
+                onPressed: () {
+                  GoRouter.of(context).go(level<levelNumber ? '/play/session/${level + 1}': '/play');
+                },
+                child: const Text('Continue'),
+              ),
+            ],
+          ),
         ),
       ),
     );

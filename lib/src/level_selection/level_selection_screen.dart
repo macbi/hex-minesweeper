@@ -22,7 +22,7 @@ class LevelSelectionScreen extends StatelessWidget {
     final playerProgress = context.watch<PlayerProgress>();
 
     return Scaffold(
-      backgroundColor: palette.backgroundLevelSelection,
+      backgroundColor: palette.cream,
       body: ResponsiveScreen(
         squarishMainArea: Column(
           children: [
@@ -31,29 +31,42 @@ class LevelSelectionScreen extends StatelessWidget {
               child: Center(
                 child: Text(
                   'Select level',
-                  style:
-                      TextStyle(fontFamily: 'Permanent Marker', fontSize: 30),
+                  style: TextStyle(fontFamily: 'Permanent Marker', fontSize: 30),
                 ),
               ),
             ),
             const SizedBox(height: 50),
             Expanded(
-              child: ListView(
+              child: GridView.count(
+                crossAxisCount: 3,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
                 children: [
                   for (final level in gameLevels)
                     ListTile(
-                      enabled: playerProgress.highestLevelReached >=
-                          level.number - 1,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      enabled: playerProgress.highestLevelReached >= level.number - 1,
+                      tileColor: palette.lightGreen,
+
                       onTap: () {
                         final audioController = context.read<AudioController>();
                         audioController.playSfx(SfxType.buttonTap);
 
-                        GoRouter.of(context)
-                            .go('/play/session/${level.number}');
+                        GoRouter.of(context).go('/play/session/${level.number}');
                       },
-                      leading: Text(level.number.toString()),
-                      title: Text('Level #${level.number}'),
-                    )
+                      titleAlignment: ListTileTitleAlignment.center,
+                      title: Text(
+                        '${level.number}',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 50,
+                          fontFamily: 'Permanent Marker',
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
