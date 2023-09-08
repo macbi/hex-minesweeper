@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-enum GridType {
+enum Type {
   square,
   hexagon,
 }
@@ -13,28 +13,42 @@ const gameLevels = [
     width: 5,
     height: 7,
     mines: 6,
-    gridType: GridType.square,
+    type: Type.square,
   ),
   GameLevel(
     number: 2,
     width: 7,
     height: 10,
     mines: 12,
-    gridType: GridType.square,
+    type: Type.square,
   ),
   GameLevel(
     number: 3,
     width: 10,
     height: 15,
     mines: 18,
-    gridType: GridType.square,
+    type: Type.square,
   ),
   GameLevel(
     number: 4,
     width: 2,
     height: 2,
     mines: 3,
-    gridType: GridType.square,
+    type: Type.square,
+  ),
+  GameLevel(
+    number: 5,
+    width: 5,
+    height: 7,
+    mines: 6,
+    type: Type.hexagon,
+  ),
+  GameLevel(
+    number: 6,
+    width: 7,
+    height: 10,
+    mines: 12,
+    type: Type.hexagon,
   ),
 ];
 
@@ -43,7 +57,7 @@ class GameLevel {
   final int width;
   final int height;
   final int mines;
-  final GridType gridType;
+  final Type type;
 
 
   const GameLevel({
@@ -51,7 +65,7 @@ class GameLevel {
     required this.width,
     required this.height,
     required this.mines,
-    required this.gridType,
+    required this.type,
   })  : assert(width > 0 && height > 0 && (height * width) > mines,
             'Invalid level configuration (mines >= cells or no positive dimensions)');
 }

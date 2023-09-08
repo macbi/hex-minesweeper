@@ -11,6 +11,7 @@ import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart' hide Level;
 import 'package:provider/provider.dart';
 import 'dart:math';
+import 'package:hexagon/hexagon.dart';
 
 import '../audio/audio_controller.dart';
 import '../audio/sounds.dart';
@@ -124,12 +125,40 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
 
   List<CellModel> getCellNeighbourhood(CellModel cell) {
     List<CellModel> neighbours = [];
-    for (int i = max(0, cell.x - 1); i <= min(width - 1, cell.x + 1); ++i) {
-      for (int j = max(0, cell.y - 1); j <= min(height - 1, cell.y + 1); ++j) {
-        if (i == cell.x && j == cell.y) continue;
-        neighbours.add(cells[i][j]);
-      }
+
+    switch (widget.level.type) {
+      case Type.square:
+        for (int i = max(0, cell.x - 1); i <= min(width - 1, cell.x + 1); ++i) {
+          for (int j = max(0, cell.y - 1); j <= min(height - 1, cell.y + 1); ++j) {
+            if (i == cell.x && j == cell.y) continue;
+            neighbours.add(cells[i][j]);
+          }
+        }
+        break;
+      case Type.hexagon:
+        if(cell.y.isOdd) {
+          for (int i = cell.x; i <= min(width - 1, cell.x + 1); ++i) {
+            for (int j = max(0, cell.y - 1); j <= min(height - 1, cell.y + 1); ++j) {
+              if (i == cell.x && j == cell.y) continue;
+              neighbours.add(cells[i][j]);
+            }
+          }
+          if (cell.x != 0) {
+            neighbours.add(cells[cell.x - 1][cell.y]);
+          }
+        } else{
+          for (int i = max(cell.x -1 ,0); i <= cell.x; i++){
+            for (int j = max(0, cell.y - 1); j <= min(height - 1, cell.y + 1); ++j) {
+              if (i == cell.x && j == cell.y) continue;
+              neighbours.add(cells[i][j]);
+            }
+          }
+          if (cell.x != width - 1) {
+            neighbours.add(cells[cell.x + 1][cell.y]);
+          }
+        }
     }
+
     return neighbours;
   }
 
@@ -169,6 +198,24 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
     );
   }
 
+  buildHexagonGrid() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        HexagonOffsetGrid.oddPointy(
+          columns: widget.level.width,
+          rows: widget.level.height,
+          buildTile: (col, row) => HexagonWidgetBuilder(
+            padding: 1.0,
+          ),
+          buildChild: (col, row) {
+            return buildButton(cells[col][row]);
+          },
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final palette = context.watch<Palette>();
@@ -197,7 +244,10 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
                       padding: const EdgeInsets.all(8.0),
                       child: Container(
                         margin: const EdgeInsets.all(1.0),
-                        child: buildButtonColumn(),
+                        //TODO change for more grid levels
+                        child: widget.level.type == Type.square
+                            ? buildButtonColumn()
+                            : buildHexagonGrid(),
                       ),
                     ),
                   ),
